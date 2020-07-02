@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+  <rdfs:Property rdf:about="http://localhost:8000/dpc.rdf#total_cases">
+    <rdfs:domain rdf:domain="http://localhost:8000/observation.rdf#Observation" />
+  </rdfs:Property>
+
+</rdf:RDF>

@@ -9,12 +9,12 @@ from rdflib.namespace import RDF, RDFS, FOAF, OWL, XSD, DC, DCTERMS
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
-# per le uri che saranno create
+# produced URIs will start with
 BASE_URI = "http://localhost:8000/"
 OUTPUT_NAME = "province"
 OUTPUT_FORMAT = "nt"
 
-# scarichiamo i dati completi in csv
+# download csv data from the italian dpc
 dati_province = urllib.request.urlopen(
     'https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-province/dpc-covid19-ita-province-latest.csv')
 dati_province = pandas.read_csv(dati_province)
@@ -24,51 +24,53 @@ def urify(string):
     return urllib.parse.quote_plus(string)
 
 
-# creazione grafo rdf
+# create an empty rdf graph and set the proper ontologies
 g = Graph()
-covid = Namespace(BASE_URI + "covid.rdf#")
-italia = Namespace(BASE_URI + "italia.rdf#")
+dpc = Namespace(BASE_URI + "dpc.rdf#")
+italy = Namespace(BASE_URI + "italy.rdf#")
+observation = Namespace(BASE_URI + "observation.rdf#")
 geo = Namespace("http://www.w3.org/2003/01/geo/wgs84_pos#")
-g.bind("covid", covid)
-g.bind("italia", italia)
+g.bind("dpc", dpc)
+g.bind("obs", observation)
+g.bind("italy", italy)
 g.bind("geo", geo)
 
 for _, row in dati_province.iterrows():
     if pandas.isnull(row.sigla_provincia):
         continue
 
-    # creazione istanze
-    uri_provincia = URIRef(BASE_URI + "provincia/" +
-                           urify(row.denominazione_provincia))
-    uri_regione = URIRef(BASE_URI + "regione/" +
-                         urify(row.denominazione_regione))
-    uri_rilevazione = URIRef(BASE_URI + "rilevazione/" +
+    # create new instances
+    uri_province = URIRef(BASE_URI + "province/" +
+                          urify(row.denominazione_provincia))
+    uri_region = URIRef(BASE_URI + "region/" +
+                        urify(row.denominazione_regione))
+    uri_observation = URIRef(BASE_URI + "observation/" +
                              urify(row.data))
 
-    g.add([uri_provincia, RDF.type, italia.Provincia])
-    g.add([uri_regione, RDF.type, italia.Regione])
-    g.add([uri_rilevazione, RDF.type, covid.Rilevazione])
+    g.add([uri_province, RDF.type, italy.Province])
+    g.add([uri_region, RDF.type, italy.Region])
+    g.add([uri_observation, RDF.type, observation.Observation])
 
-    # dati per provincia
-    g.add([uri_provincia, geo.lat, Literal(row.lat)])
-    g.add([uri_provincia, geo.long, Literal(row.long)])
-    g.add([uri_provincia, italia.nome, Literal(row.denominazione_provincia)])
-    g.add([uri_provincia, italia.sigla, Literal(row.sigla_provincia)])
-    g.add([uri_provincia, italia.codice, Literal(
+    # set data for the given province
+    g.add([uri_province, geo.lat, Literal(row.lat)])
+    g.add([uri_province, geo.long, Literal(row.long)])
+    g.add([uri_province, italy.name, Literal(row.denominazione_provincia)])
+    g.add([uri_province, italy.short_name, Literal(row.sigla_provincia)])
+    g.add([uri_province, italy.code, Literal(
         "{:03d}".format(row.codice_provincia))])
 
-    # dati per regione
-    g.add([uri_regione, italia.nome, Literal(row.denominazione_regione)])
-    g.add([uri_regione, italia.haProvincia, uri_provincia])
-    g.add([uri_regione, italia.codice, Literal(
+    # set data for the given region
+    g.add([uri_region, italy.name, Literal(row.denominazione_regione)])
+    g.add([uri_region, italy.hasProvince, uri_province])
+    g.add([uri_region, italy.code, Literal(
         "{:02d}".format(row.codice_regione))])
 
-    # dati per rilevazione
+    # set data for the given observation
     blank = BNode()
-    g.add([uri_rilevazione, covid.data, Literal(row.data)])
-    g.add([uri_rilevazione, covid.su, blank])
-    g.add([blank, covid.luogo, uri_provincia])
-    g.add([blank, covid.totaleCasi, Literal(row.totale_casi)])
+    g.add([uri_observation, observation.date, Literal(row.data)])
+    g.add([uri_observation, observation.about, blank])
+    g.add([blank, observation.place, uri_province])
+    g.add([blank, dpc.total_cases, Literal(row.totale_casi)])
 
 g.serialize(destination='./' + OUTPUT_NAME + '.' +
             OUTPUT_FORMAT, format=OUTPUT_FORMAT)
