@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+  <rdfs:Class rdf:about="http://localhost:8000/italia.rdf#Regione">
+    <rdfs:label xml:lang="it">Regione</rdfs:label>
+  </rdfs:Class>
+
+  <rdfs:Class rdf:about="http://localhost:8000/italia.rdf#Provincia">
+    <rdfs:label xml:lang="it">Provincia</rdfs:label>
+  </rdfs:Class>
+
+  <rdfs:Property rdf:about="http://localhost:8000/italia.rdf#haProvincia">
+    <rdfs:label xml:lang="it">haProvincia</rdfs:label>
+    <rdfs:domain rdf:domain="http://localhost:8000/italia.rdf#Regione" />
+    <rdfs:range rdf:range="http://localhost:8000/italia.rdf#Provincia" />
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/italia.rdf#codice">
+    <rdfs:label xml:lang="it">codice</rdfs:label>
+    <rdfs:domain rdf:domain="http://localhost:8000/italia.rdf#Regione" />
+    <rdfs:domain rdf:domain="http://localhost:8000/italia.rdf#Provincia" />
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/italia.rdf#nome">
+    <rdfs:label xml:lang="it">nome</rdfs:label>
+    <rdfs:domain rdf:domain="http://localhost:8000/italia.rdf#Regione" />
+    <rdfs:domain rdf:domain="http://localhost:8000/italia.rdf#Provincia" />
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/italia.rdf#sigla">
+    <rdfs:label xml:lang="it">sigla</rdfs:label>
+    <rdfs:domain rdf:domain="http://localhost:8000/italia.rdf#Provincia" />
+  </rdfs:Property>
+
+</rdf:RDF>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+  <rdfs:Class rdf:about="http://localhost:8000/covid.rdf#Rilevazione">
+    <rdfs:label xml:lang="it">Rilevazione</rdfs:label>
+    <rdfs:comment>Rilevazione giornaliera del numero di casi</rdfs:comment>
+  </rdfs:Class>
+
+  <rdfs:Property rdf:about="http://localhost:8000/covid.rdf#su">
+    <rdfs:label xml:lang="it">su</rdfs:label>
+    <rdfs:domain rdf:domain="http://localhost:8000/covid.rdf#Rilevazione" />
+  </rdfs:Property>
+  
+  <rdfs:Property rdf:about="http://localhost:8000/covid.rdf#luogo">
+    <rdfs:range rdf:range="http://localhost:8000/italia.rdf#Regione" />
+    <rdfs:range rdf:range="http://localhost:8000/italia.rdf#Provincia" />
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/covid.rdf#totaleCasi">
+    <rdfs:label xml:lang="it">totaleCasi</rdfs:label>
+    <rdfs:domain rdf:domain="http://localhost:8000/covid.rdf#Rilevazione" />
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/covid.rdf#data">
+    <rdfs:label xml:lang="it">data</rdfs:label>
+    <rdfs:domain rdf:domain="http://localhost:8000/covid.rdf#Rilevazione" />
+  </rdfs:Property>
+
+</rdf:RDF>
