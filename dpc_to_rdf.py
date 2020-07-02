@@ -1,9 +1,10 @@
-import sparql
 import urllib.request
 import urllib.parse
 import pandas
+from datetime import datetime
 from rdflib import Graph, Literal, Namespace, URIRef, BNode
 from rdflib.namespace import RDF, RDFS, FOAF, OWL, XSD, DC, DCTERMS
+import progressbar
 
 # https://stackoverflow.com/questions/35569042/ssl-certificate-verify-failed-with-python3
 import ssl
@@ -11,13 +12,13 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 # produced URIs will start with
 BASE_URI = "http://localhost:8000/"
-OUTPUT_NAME = "province"
+OUTPUT_NAME = "dpc"
 OUTPUT_FORMAT = "nt"
 
 # download csv data from the italian dpc
-dati_province = urllib.request.urlopen(
+province_data = urllib.request.urlopen(
     'https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-province/dpc-covid19-ita-province-latest.csv')
-dati_province = pandas.read_csv(dati_province)
+province_data = pandas.read_csv(province_data)
 
 
 def urify(string):
@@ -35,17 +36,18 @@ g.bind("obs", observation)
 g.bind("italy", italy)
 g.bind("geo", geo)
 
-for _, row in dati_province.iterrows():
+for _, row in progressbar.progressbar(province_data.iterrows(), max_value=len(province_data.index)):
     if pandas.isnull(row.sigla_provincia):
         continue
 
     # create new instances
+    date = str(pandas.to_datetime(row.data).date())
     uri_province = URIRef(BASE_URI + "province/" +
                           urify(row.denominazione_provincia))
     uri_region = URIRef(BASE_URI + "region/" +
                         urify(row.denominazione_regione))
     uri_observation = URIRef(BASE_URI + "observation/" +
-                             urify(row.data))
+                             urify(date))
 
     g.add([uri_province, RDF.type, italy.Province])
     g.add([uri_region, RDF.type, italy.Region])
@@ -67,7 +69,7 @@ for _, row in dati_province.iterrows():
 
     # set data for the given observation
     blank = BNode()
-    g.add([uri_observation, observation.date, Literal(row.data)])
+    g.add([uri_observation, observation.date, Literal(date)])
     g.add([uri_observation, observation.about, blank])
     g.add([blank, observation.place, uri_province])
     g.add([blank, dpc.total_cases, Literal(row.totale_casi)])
