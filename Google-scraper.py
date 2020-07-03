@@ -1,5 +1,4 @@
-from urllib.request import urlopen, urlretrieve, quote
-from urllib.parse import urljoin
+from urllib.request import urlopen, urlretrieve
 from bs4 import BeautifulSoup
 
 url = 'https://www.google.com/covid19/mobility/'
