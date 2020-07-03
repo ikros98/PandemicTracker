@@ -121,19 +121,19 @@ results = sparql.query('https://semantic.eea.europa.eu/sparql', """
     PREFIX sk: <http://www.w3.org/2004/02/skos/core#>
     PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
 
-    SELECT ?station ?lat ?long
+    SELECT ?station ?eoi_code ?lat ?long
     WHERE {
     ?station airbase:country ?nation ;
             geo:lat ?lat ;
-            geo:long ?long .
+            geo:long ?long ;
+            airbase:station_european_code ?eoi_code .
     ?nation sk:notation ?nation_code .
     filter (?nation_code='IT') .
     } 
 """).fetchall()
 
 for row in progressbar.progressbar(results):
-    station, latitude, longitude = sparql.unpack_row(row)
-    eoi_code = station.rsplit('/', 1)[-1]
+    station, eoi_code, latitude, longitude = sparql.unpack_row(row)
 
     # query the api for a particular station
     sources = urllib.request.urlopen(
