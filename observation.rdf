@@ -9,7 +9,7 @@
     <rdfs:comment>Daily observation</rdfs:comment>
   </rdfs:Class>
 
-  <rdfs:Property rdf:about="http://localhost:8000/observation.rdf#about">
+  <rdfs:Property rdf:about="http://localhost:8000/observation.rdf#of">
     <rdfs:domain rdf:domain="http://localhost:8000/observation.rdf#Observation" />
   </rdfs:Property>
   

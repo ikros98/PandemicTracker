@@ -10,6 +10,11 @@ import progressbar
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
+
+def urify(string):
+    return urllib.parse.quote_plus(string)
+
+
 # produced URIs will start with
 BASE_URI = "http://localhost:8000/"
 OUTPUT_NAME = "dpc"
@@ -17,13 +22,8 @@ OUTPUT_FORMAT = "nt"
 
 # download csv data from the italian dpc
 province_data = urllib.request.urlopen(
-    'https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-province/dpc-covid19-ita-province-latest.csv')
+    'https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-province/dpc-covid19-ita-province.csv')
 province_data = pandas.read_csv(province_data)
-
-
-def urify(string):
-    return urllib.parse.quote_plus(string)
-
 
 # create an empty rdf graph and set the proper ontologies
 g = Graph()
@@ -70,7 +70,7 @@ for _, row in progressbar.progressbar(province_data.iterrows(), max_value=len(pr
     # set data for the given observation
     blank = BNode()
     g.add([uri_observation, observation.date, Literal(date)])
-    g.add([uri_observation, observation.about, blank])
+    g.add([uri_observation, observation.of, blank])
     g.add([blank, observation.place, uri_province])
     g.add([blank, dpc.total_cases, Literal(row.totale_casi)])
 

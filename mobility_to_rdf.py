@@ -9,6 +9,11 @@ import progressbar
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
+
+def urify(string):
+    return urllib.parse.quote_plus(string)
+
+
 # produced URIs will start with
 BASE_URI = "http://localhost:8000/"
 OUTPUT_NAME = "mobility"
@@ -17,11 +22,6 @@ OUTPUT_FORMAT = "nt"
 # download csv data from the italian dpc
 google_mobility_trends = pandas.read_csv('./google.csv')
 apple_mobility_trends = pandas.read_csv('./apple.csv')
-
-
-def urify(string):
-    return urllib.parse.quote_plus(string)
-
 
 g_it_regions = ['Friuli Venezia Giulia', 'Lombardia', 'Sicilia', 'Sardegna', 'Piemonte',
                 'Valle d\'Aosta', 'Puglia', 'Toscana', 'P.A. Bolzano', 'P.A. Trento']
@@ -80,7 +80,7 @@ for _, google_row in progressbar.progressbar(google_mobility_trends.iterrows(), 
     # set data for the given observation
     blank = BNode()
     g.add([uri_observation, observation.date, Literal(google_row.date)])
-    g.add([uri_observation, observation.about, blank])
+    g.add([uri_observation, observation.of, blank])
     g.add([blank, observation.place, uri_region])
 
     g.add([blank, google_mobility.retail_recreation, Literal(

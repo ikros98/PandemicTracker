@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#namespace">
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#air_quality_network">
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#air_quality_station">
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#air_quality_station_eoi_code">
+  </rdfs:Property>
+
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#pollutant">
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#sampling_point">
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#sampling_process">
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#sample">
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#air_pollutant">
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#air_pollutant_code">
+  </rdfs:Property>
+
+
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#measurement">
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#datetime_begin">
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#datetime_end">
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#concentration">
+  </rdfs:Property>
+
+  <rdfs:Property rdf:about="http://localhost:8000/pollution.rdf#unit_of_measurement">
+  </rdfs:Property>
+
+</rdf:RDF>
