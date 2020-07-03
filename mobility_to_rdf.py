@@ -1,5 +1,7 @@
-import urllib.request
 import urllib.parse
+from urllib.request import urlretrieve, urlopen
+from selenium import webdriver
+from bs4 import BeautifulSoup
 import pandas
 from rdflib import Graph, Literal, Namespace, URIRef, BNode
 from rdflib.namespace import RDF, RDFS, FOAF, OWL, XSD, DC, DCTERMS
@@ -14,14 +16,52 @@ def urify(string):
     return urllib.parse.quote_plus(string)
 
 
+def get_apple_csv():
+    # scraper to get the link to apple's csv
+
+    op = webdriver.ChromeOptions()
+    op.add_argument('headless')
+    driver = webdriver.Chrome(
+        '/usr/lib/chromium-browser/chromedriver', options=op)
+
+    driver.get('https://www.apple.com/covid19/mobility')
+
+    driver.implicitly_wait(5)
+    link = driver.find_element_by_xpath('//*[@id="download-card"]/div[2]/a')
+    href = link.get_attribute('href')
+
+    driver.quit()
+
+    return href
+
+
+def get_google_csv():
+    # scraper to get the link to google's csv
+
+    url = 'https://www.google.com/covid19/mobility/'
+    u = urlopen(url)
+
+    try:
+        html = u.read().decode('utf-8')
+    finally:
+        u.close()
+
+    soup = BeautifulSoup(html, features="html.parser")
+
+    link = soup.select_one('.icon-link')
+    href = link.get('href')
+
+    return href
+
+
 # produced URIs will start with
 BASE_URI = "http://localhost:8000/"
 OUTPUT_NAME = "mobility"
 OUTPUT_FORMAT = "nt"
 
 # download csv data from the italian dpc
-google_mobility_trends = pandas.read_csv('./google.csv')
-apple_mobility_trends = pandas.read_csv('./apple.csv')
+google_mobility_trends = pandas.read_csv(get_google_csv())
+apple_mobility_trends = pandas.read_csv(get_apple_csv())
 
 g_it_regions = ['Friuli Venezia Giulia', 'Lombardia', 'Sicilia', 'Sardegna', 'Piemonte',
                 'Valle d\'Aosta', 'Puglia', 'Toscana', 'P.A. Bolzano', 'P.A. Trento']
