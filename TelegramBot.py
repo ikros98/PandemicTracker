@@ -1,7 +1,7 @@
 import sys
-
+from time import sleep
 import logging
-from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove,TelegramError)
+from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, TelegramError, Bot, ChatAction)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler)
 from telegram.error import (TelegramError, Unauthorized, BadRequest, 
@@ -16,9 +16,12 @@ logger = logging.getLogger(__name__)
 CHOICE, LOCATION, CHOOSING = range(3)
 
 token = sys.argv[1]
+#use_context=True to use the new context based callbacks
+updater = Updater(token, use_context=True)
+bot = Bot(token = token)
 
 def start(update, context):
-    reply_keyboard = [['Stat by location','Global stat'],
+    reply_keyboard = [['Stats by location','Global stats'],
                         ['Done']]
 
     update.message.reply_text(
@@ -31,13 +34,13 @@ def start(update, context):
 def choice(update, context):
     user = update.message.from_user
     logger.info("Choice of %s: %s", user.first_name, update.message.text)
-    reply_keyboard = [['More stat','Done']]
+    reply_keyboard = [['More stats','Done']]
 
-    if update.message.text == 'Stat by location':
-        update.message.reply_text('Send me a fucking location', reply_markup=ReplyKeyboardRemove())
+    if update.message.text == 'Stats by location':
+        update.message.reply_text('Send me a location', reply_markup=ReplyKeyboardRemove())
         return LOCATION
 
-    elif  update.message.text == 'Global stat':
+    elif  update.message.text == 'Global stats':
         update.message.reply_text(
         'Here there are the data:\n... ... ...',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True, one_time_keyboard=True))
@@ -51,19 +54,25 @@ def location(update, context):
     logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
                 user_location.longitude)
     
-    reply_keyboard = [['More stat','Done']]
+    reply_keyboard = [['More stats','Done']]
+    
     update.message.reply_text(
         'Here there are the data:\n... ... ...',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True, one_time_keyboard=True))
+
+    bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING)
+    sleep(2)
+    bot.send_photo(chat_id = update.message.chat_id, photo=open('test.png', 'rb'))
+
     return CHOOSING
 
 def choosing(update, context): 
     user = update.message.from_user
     logger.info("Chosing")
-    reply_keyboard = [['Stat by location','Global stat'],
+    reply_keyboard = [['Stats by location','Global stats'],
                         ['Done']]
 
-    if update.message.text == 'More stat':
+    if update.message.text == 'More stats':
         update.message.reply_text(
                 "I hope u are doing well",
                 reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True, one_time_keyboard=True))
@@ -102,9 +111,8 @@ def error_handler(update, context):
         # handle all other telegram related errors
         print("f")
 
+
 def main():
-    #use_context=True to use the new context based callbacks
-    updater = Updater(token, use_context=True)
 
     dp = updater.dispatcher
 
@@ -114,11 +122,11 @@ def main():
 
         states={
 
-            CHOICE: [MessageHandler(Filters.regex('^(Stat by location|Global stat)$'), choice)],
+            CHOICE: [MessageHandler(Filters.regex('^(Stats by location|Global stats)$'), choice)],
 
             LOCATION: [MessageHandler(Filters.location, location)],
 
-            CHOOSING: [MessageHandler(Filters.regex('^More stat$'), choosing)]
+            CHOOSING: [MessageHandler(Filters.regex('^More stats$'), choosing)]
         },
 
         fallbacks=[MessageHandler(Filters.regex('^Done$'), done)]
