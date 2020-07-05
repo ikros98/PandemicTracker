@@ -18,7 +18,7 @@ def urify(string):
 # produced URIs will start with
 BASE_URI = "http://localhost:8000/"
 OUTPUT_NAME = "dpc"
-OUTPUT_FORMAT = "nt"
+OUTPUT_FORMAT = "ttl"
 
 # download csv data from the italian dpc
 province_data = urllib.request.urlopen(
@@ -40,12 +40,16 @@ for _, row in progressbar.progressbar(province_data.iterrows(), max_value=len(pr
     if pandas.isnull(row.sigla_provincia):
         continue
 
+    region = row.denominazione_regione
+    if 'P.A.' in region:
+        region = 'Trentino Alto Adige'
+
     # create new instances
     date = str(pandas.to_datetime(row.data).date())
     uri_province = URIRef(BASE_URI + "province/" +
                           urify(row.denominazione_provincia))
     uri_region = URIRef(BASE_URI + "region/" +
-                        urify(row.denominazione_regione))
+                        urify(region))
     uri_observation = URIRef(BASE_URI + "observation/" +
                              urify(date))
 
@@ -62,7 +66,7 @@ for _, row in progressbar.progressbar(province_data.iterrows(), max_value=len(pr
         "{:03d}".format(row.codice_provincia))])
 
     # set data for the given region
-    g.add([uri_region, italy.name, Literal(row.denominazione_regione)])
+    g.add([uri_region, italy.name, Literal(region)])
     g.add([uri_region, italy.hasProvince, uri_province])
     g.add([uri_region, italy.code, Literal(
         "{:02d}".format(row.codice_regione))])

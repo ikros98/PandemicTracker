@@ -19,7 +19,7 @@ def urify(string):
 # produced URIs will start with
 BASE_URI = "http://localhost:8000/"
 OUTPUT_NAME = "pollution"
-OUTPUT_FORMAT = "nt"
+OUTPUT_FORMAT = "ttl"
 
 # create an empty rdf graph and set the proper ontologies
 g = Graph()

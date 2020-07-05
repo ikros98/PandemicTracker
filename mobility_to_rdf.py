@@ -57,21 +57,19 @@ def get_google_csv():
 # produced URIs will start with
 BASE_URI = "http://localhost:8000/"
 OUTPUT_NAME = "mobility"
-OUTPUT_FORMAT = "nt"
+OUTPUT_FORMAT = "ttl"
 
 # download csv data from the italian dpc
 google_mobility_trends = pandas.read_csv(get_google_csv())
 apple_mobility_trends = pandas.read_csv(get_apple_csv())
 
 g_it_regions = ['Friuli Venezia Giulia', 'Lombardia', 'Sicilia', 'Sardegna', 'Piemonte',
-                'Valle d\'Aosta', 'Puglia', 'Toscana', 'P.A. Bolzano', 'P.A. Trento']
+                'Valle d\'Aosta', 'Puglia', 'Toscana', 'Trentino Alto Adige']
 g_en_regions = ['Friuli-Venezia Giulia', 'Lombardy', 'Sicily', 'Sardinia', 'Piedmont', 'Aosta',
-                'Apulia', 'Tuscany', 'Trentino-South Tyrol', 'Trentino-South Tyrol']
+                'Apulia', 'Tuscany', 'Trentino-South Tyrol']
 
-a_it_regions = ['Friuli Venezia Giulia',
-                'Emilia-Romagna', 'P.A. Bolzano', 'P.A. Trento']
-a_en_regions = ['Friuli venezia Giulia', 'Emilia Romagna',
-                'Trentino Alto Adige', 'Trentino Alto Adige']
+a_it_regions = ['Friuli Venezia Giulia', 'Emilia-Romagna']
+a_en_regions = ['Friuli venezia Giulia', 'Emilia Romagna']
 
 # keep only italian data
 google_mobility_trends = google_mobility_trends[google_mobility_trends['country_region_code'] == 'IT']
@@ -94,7 +92,7 @@ for _, google_row in progressbar.progressbar(google_mobility_trends.iterrows(), 
 
     # translate google region names to italian
     region_name = google_row.sub_region_1
-    if google_row.sub_region_1 in g_en_regions:
+    if region_name in g_en_regions:
         region_name = g_it_regions[g_en_regions.index(google_row.sub_region_1)]
 
     # and then to apple's english version, so that we can put the two together
