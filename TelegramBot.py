@@ -6,6 +6,8 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler)
 from telegram.error import (TelegramError, Unauthorized, BadRequest, 
                             TimedOut, ChatMigrated, NetworkError)                          
+from query import *
+from graph import *
 
 #Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -61,8 +63,15 @@ def location(update, context):
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True, one_time_keyboard=True))
 
     bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING)
-    sleep(2)
-    bot.send_photo(chat_id = update.message.chat_id, photo=open('test.png', 'rb'))
+    
+    province = get_province_for(user_location.latitude, user_location.longitude)
+    station = get_station_for(user_location.latitude, user_location.longitude)
+    observations = get_observations_for(province[0], station[0])
+
+    image = plot_for(province, station, observations)
+
+    bot.send_photo(chat_id=update.message.chat_id, photo=image)
+
 
     return CHOOSING
 

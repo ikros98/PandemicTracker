@@ -168,9 +168,9 @@ g.serialize(destination='./output.ttl', format='ttl')
 È bene notare che non c'è una compatibilità perfetta tra i vari dataset e gli script che li uniscono ne devono tenere conto. Per esempio, nel file del Dipartimento della Protezione Civile sotto la colonna `denominazione_regione` sono presenti `P.A. Trento` e `P.A. Bolzano`. Questa distinzione, però, non è presente né nei dati di Google né in quelli di Apple, che invece riportano rispettivamente `Trentino-South Tyrol` e `Trentino Alto Adige`. Per ovviare a questa incongruenza, nello script `dpc_to_rdf.py` effettuiamo il seguente controllo ed eventuale rinominazione
 
 ```py
-regione = row.denominazione_regione
-if 'P.A.' in regione:
-    regione = 'Trentino Alto Adige'
+region = row.denominazione_regione
+if 'P.A.' in region:
+    region = 'Trentino Alto Adige'
 ```
 
 e similmente nello script `mobility_to_rdf.py`, quando si incontra una regione con nome diverso da quello utilizzato negli altri file, si fa la rinominazione ad uno standard
@@ -301,10 +301,8 @@ where {
 
     } group by ?m_observation ?m_s
   }
-  optional {
-    filter(?observation = ?m_observation) .
-    filter(?s = ?m_s) .
-  }
+  filter(?observation = ?m_observation) .
+  filter(?s = ?m_s) .
 } 
 order by asc(?date)
 ```
