@@ -27,7 +27,6 @@ def get_province_for(latitude, longitude):
 
 
 def get_station_for(latitude, longitude):
-
     q = """
     PREFIX italy: <http://localhost:8000/italy.ttl#>
     PREFIX airbase: <http://reference.eionet.europa.eu/airbase/schema/>
@@ -52,9 +51,8 @@ def get_station_for(latitude, longitude):
         }
 
         ?internal_stat owl:sameAs ?stat ;
-                       pol:measures ?blank .
-        ?blank pol:pollutant ?pollutant .
-        ?pollutant pol:air_pollutant "PM10" . 
+                       ?p ?blank .
+        ?blank pol:pollutant <http://localhost:8000/pollutant/PM10> .
     }
     order by asc(?dist)
     limit 1
@@ -79,16 +77,15 @@ def get_observations_for(province, station):
     select ?date ?PM10 ?total_cases ?driving ?retail_recreation ?grocery_pharmacy ?parks ?transit_stations ?workplaces ?residential
     where {
         ?observation obs:date ?date ; 
-                     obs:of ?p, 
-                            ?r, 
-                            ?s .
+                     obs:of ?p , 
+                            ?r .
 
         ?p rdf:type dpc:DpcObservation ;
            dpc:place ?prov ;
            dpc:total_cases ?total_cases .
         ?prov rdf:type italy:Province ;
               italy:name ?province .
-        filter (?prov = <http://localhost:8000/province/Ferrara>) .
+        filter (?prov = <""" + province + """>) .
 
         ?r rdf:type mob:MobilityObservation ;
            mob:place ?reg .
@@ -105,26 +102,26 @@ def get_observations_for(province, station):
                mob:residential ?residential .
         } 
 
-        ?s rdf:type pol:PollutionObservation ;
-           pol:Station <http://localhost:8000/station/IT0187A> .
         { 
-            select ?m_observation avg(?concentration) as ?PM10
-                where {
-                    ?m_observation obs:of ?m_s .
-                    
-                    ?m_s rdf:type pol:PollutionObservation ;
-                         pol:observing ?observing .
+            select xsd:string(bif:dateadd('day', 14, xsd:date(?m_date))) as ?m_date avg(?concentration) as ?PM10
+            where {
+                ?m_observation obs:of ?m_s ;
+                               obs:date ?m_date .
+                
+                ?m_s rdf:type pol:PollutionObservation ;
+                     pol:observing ?observing ;
+                     pol:station <""" + station + """> .
 
-                    ?observing rdf:type pol:PollutantObservation ;
-                               pol:pollutant ?pollutant ;
-                               pol:pollutant_measurement ?measurement .
+                ?observing rdf:type pol:PollutantObservation ;
+                           pol:pollutant ?pollutant ;
+                           pol:pollutant_measurement ?measurement .
 
-                    ?pollutant pol:air_pollutant "PM10" .
-                    ?measurement pol:concentration ?concentration .
-                } 
-                group by ?m_observation
+                ?pollutant pol:air_pollutant "PM10" .
+                ?measurement pol:concentration ?concentration .
+            } 
+            group by ?m_date
         }
-        filter(?observation = ?m_observation) .
+        filter(?date = ?m_date) .
 
     } order by asc(?date)
     """
