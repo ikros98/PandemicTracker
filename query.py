@@ -83,8 +83,7 @@ def get_observations_for(province, station):
         ?p rdf:type dpc:DpcObservation ;
            dpc:place ?prov ;
            dpc:total_cases ?total_cases .
-        ?prov rdf:type italy:Province ;
-              italy:name ?province .
+        ?prov rdf:type italy:Province .
         filter (?prov = <""" + province + """>) .
 
         ?r rdf:type mob:MobilityObservation ;
@@ -113,10 +112,9 @@ def get_observations_for(province, station):
                      pol:station <""" + station + """> .
 
                 ?observing rdf:type pol:PollutantObservation ;
-                           pol:pollutant ?pollutant ;
+                           pol:pollutant <http://localhost:8000/pollutant/PM10> ;
                            pol:pollutant_measurement ?measurement .
 
-                ?pollutant pol:air_pollutant "PM10" .
                 ?measurement pol:concentration ?concentration .
             } 
             group by ?m_date

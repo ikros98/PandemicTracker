@@ -152,7 +152,7 @@ results = sparql.query('https://semantic.eea.europa.eu/sparql', """
     SELECT ?station ?eoi_code
     WHERE {
        ?station airbase:country ?nation ;
-              airbase:station_european_code ?eoi_code .
+                airbase:station_european_code ?eoi_code .
        ?nation sk:notation ?nation_code .
        filter (?nation_code='IT') .
     }
