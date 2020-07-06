@@ -123,7 +123,7 @@ def download_pollutants_for_station(station, eoi_code, sources):
                 # set relation to this station
                 g.add([uri_observation, obs.of, b_pollution_observation])
                 g.add([b_pollution_observation, RDF.type, pol.PollutionObservation])
-                g.add([b_pollution_observation, pol.Station, uri_station])
+                g.add([b_pollution_observation, pol.station, uri_station])
 
                 # set relation to this pollutant
                 g.add([b_pollution_observation,

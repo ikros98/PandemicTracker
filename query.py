@@ -79,16 +79,15 @@ def get_observations_for(province, station):
     select ?date ?PM10 ?total_cases ?driving ?retail_recreation ?grocery_pharmacy ?parks ?transit_stations ?workplaces ?residential
     where {
         ?observation obs:date ?date ; 
-                     obs:of ?p, 
-                            ?r, 
-                            ?s .
+                     obs:of ?p , 
+                            ?r .
 
         ?p rdf:type dpc:DpcObservation ;
            dpc:place ?prov ;
            dpc:total_cases ?total_cases .
         ?prov rdf:type italy:Province ;
               italy:name ?province .
-        filter (?prov = <http://localhost:8000/province/Ferrara>) .
+        filter (?prov = <""" + province + """>) .
 
         ?r rdf:type mob:MobilityObservation ;
            mob:place ?reg .
@@ -105,24 +104,23 @@ def get_observations_for(province, station):
                mob:residential ?residential .
         } 
 
-        ?s rdf:type pol:PollutionObservation ;
-           pol:Station <http://localhost:8000/station/IT0187A> .
         { 
             select ?m_observation avg(?concentration) as ?PM10
-                where {
-                    ?m_observation obs:of ?m_s .
-                    
-                    ?m_s rdf:type pol:PollutionObservation ;
-                         pol:observing ?observing .
+            where {
+                ?m_observation obs:of ?m_s .
+                
+                ?m_s rdf:type pol:PollutionObservation ;
+                        pol:observing ?observing ;
+                        pol:station <""" + station + """> .
 
-                    ?observing rdf:type pol:PollutantObservation ;
-                               pol:pollutant ?pollutant ;
-                               pol:pollutant_measurement ?measurement .
+                ?observing rdf:type pol:PollutantObservation ;
+                            pol:pollutant ?pollutant ;
+                            pol:pollutant_measurement ?measurement .
 
-                    ?pollutant pol:air_pollutant "PM10" .
-                    ?measurement pol:concentration ?concentration .
-                } 
-                group by ?m_observation
+                ?pollutant pol:air_pollutant "PM10" .
+                ?measurement pol:concentration ?concentration .
+            } 
+            group by ?m_observation
         }
         filter(?observation = ?m_observation) .
 
@@ -130,3 +128,28 @@ def get_observations_for(province, station):
     """
 
     return sparql.query('http://localhost:8890/sparql', q)
+
+
+def get_shifted_station_observation(station):
+    q = """
+    PREFIX obs: <http://localhost:8000/observation.ttl#>
+    PREFIX pol: <http://localhost:8000/pollution.ttl#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+    select ?m_observation avg(?concentration) as ?PM10
+    where {
+        ?m_observation obs:of ?m_s .
+        
+        ?m_s rdf:type pol:PollutionObservation ;
+             pol:observing ?observing .
+
+        ?observing rdf:type pol:PollutantObservation ;
+                    pol:pollutant ?pollutant ;
+                    pol:pollutant_measurement ?measurement .
+
+        ?pollutant pol:air_pollutant "PM10" .
+        ?measurement pol:concentration ?concentration .
+    } 
+    group by ?m_observation
+    """
