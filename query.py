@@ -105,51 +105,27 @@ def get_observations_for(province, station):
         } 
 
         { 
-            select ?m_observation avg(?concentration) as ?PM10
+            select xsd:string(bif:dateadd('day', 14, xsd:date(?m_date))) as ?m_date avg(?concentration) as ?PM10
             where {
-                ?m_observation obs:of ?m_s .
+                ?m_observation obs:of ?m_s ;
+                               obs:date ?m_date .
                 
                 ?m_s rdf:type pol:PollutionObservation ;
-                        pol:observing ?observing ;
-                        pol:station <""" + station + """> .
+                     pol:observing ?observing ;
+                     pol:station <""" + station + """> .
 
                 ?observing rdf:type pol:PollutantObservation ;
-                            pol:pollutant ?pollutant ;
-                            pol:pollutant_measurement ?measurement .
+                           pol:pollutant ?pollutant ;
+                           pol:pollutant_measurement ?measurement .
 
                 ?pollutant pol:air_pollutant "PM10" .
                 ?measurement pol:concentration ?concentration .
             } 
-            group by ?m_observation
+            group by ?m_date
         }
-        filter(?observation = ?m_observation) .
+        filter(?date = ?m_date) .
 
     } order by asc(?date)
     """
 
     return sparql.query('http://localhost:8890/sparql', q)
-
-
-def get_shifted_station_observation(station):
-    q = """
-    PREFIX obs: <http://localhost:8000/observation.ttl#>
-    PREFIX pol: <http://localhost:8000/pollution.ttl#>
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-    select ?m_observation avg(?concentration) as ?PM10
-    where {
-        ?m_observation obs:of ?m_s .
-        
-        ?m_s rdf:type pol:PollutionObservation ;
-             pol:observing ?observing .
-
-        ?observing rdf:type pol:PollutantObservation ;
-                    pol:pollutant ?pollutant ;
-                    pol:pollutant_measurement ?measurement .
-
-        ?pollutant pol:air_pollutant "PM10" .
-        ?measurement pol:concentration ?concentration .
-    } 
-    group by ?m_observation
-    """
