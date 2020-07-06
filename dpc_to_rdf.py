@@ -17,7 +17,7 @@ def urify(string):
 
 # produced URIs will start with
 BASE_URI = "http://localhost:8000/"
-OUTPUT_NAME = "dpc"
+OUTPUT_NAME = "dpc_data"
 OUTPUT_FORMAT = "ttl"
 
 # download csv data from the italian dpc
@@ -27,12 +27,12 @@ province_data = pandas.read_csv(province_data)
 
 # create an empty rdf graph and set the proper ontologies
 g = Graph()
-dpc = Namespace(BASE_URI + "dpc.rdf#")
-italy = Namespace(BASE_URI + "italy.rdf#")
-observation = Namespace(BASE_URI + "observation.rdf#")
+dpc = Namespace(BASE_URI + "dpc.ttl#")
+italy = Namespace(BASE_URI + "italy.ttl#")
+obs = Namespace(BASE_URI + "observation.ttl#")
 geo = Namespace("http://www.w3.org/2003/01/geo/wgs84_pos#")
 g.bind("dpc", dpc)
-g.bind("obs", observation)
+g.bind("obs", obs)
 g.bind("italy", italy)
 g.bind("geo", geo)
 
@@ -46,6 +46,8 @@ for _, row in progressbar.progressbar(province_data.iterrows(), max_value=len(pr
 
     # create new instances
     date = str(pandas.to_datetime(row.data).date())
+    uri_country = URIRef(BASE_URI + "country/" +
+                         urify('Italia'))
     uri_province = URIRef(BASE_URI + "province/" +
                           urify(row.denominazione_provincia))
     uri_region = URIRef(BASE_URI + "region/" +
@@ -53,9 +55,12 @@ for _, row in progressbar.progressbar(province_data.iterrows(), max_value=len(pr
     uri_observation = URIRef(BASE_URI + "observation/" +
                              urify(date))
 
+    g.add([uri_country, RDF.type, italy.Country])
+    g.add([uri_country, italy.has_region, uri_region])
+
     g.add([uri_province, RDF.type, italy.Province])
     g.add([uri_region, RDF.type, italy.Region])
-    g.add([uri_observation, RDF.type, observation.Observation])
+    g.add([uri_observation, RDF.type, dpc.Observation])
 
     # set data for the given province
     g.add([uri_province, geo.lat, Literal(row.lat)])
@@ -67,15 +72,16 @@ for _, row in progressbar.progressbar(province_data.iterrows(), max_value=len(pr
 
     # set data for the given region
     g.add([uri_region, italy.name, Literal(region)])
-    g.add([uri_region, italy.hasProvince, uri_province])
+    g.add([uri_region, italy.has_province, uri_province])
     g.add([uri_region, italy.code, Literal(
         "{:02d}".format(row.codice_regione))])
 
     # set data for the given observation
     blank = BNode()
-    g.add([uri_observation, observation.date, Literal(date)])
-    g.add([uri_observation, observation.of, blank])
-    g.add([blank, observation.place, uri_province])
+    g.add([uri_observation, obs.date, Literal(date)])
+    g.add([uri_observation, obs.of, blank])
+    g.add([blank, RDF.type, dpc.DpcObservation])
+    g.add([blank, dpc.place, uri_province])
     g.add([blank, dpc.total_cases, Literal(row.totale_casi)])
 
 g.serialize(destination='./' + OUTPUT_NAME + '.' +

@@ -2,4 +2,5 @@
 *.code-workspace
 *.csv
 *.nt
-*.ttl
+*_data.ttl
+*.zip

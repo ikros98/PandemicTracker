@@ -1,0 +1,21 @@
+@prefix : <http://localhost:8000/dpc#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix italy: <http://localhost:8000/italy#> .
+@prefix obs: <http://localhost:8000/observation#> .
+@base <http://localhost:8000/dpc> .
+
+<http://localhost:8000/dpc> rdf:type owl:Ontology .
+
+:DpcObservation rdf:type owl:Class ;
+                rdfs:subClassOf obs:TypeOfObservation .
+
+:place rdf:type owl:ObjectProperty ;
+       rdfs:domain :DpcObservation ;
+       rdfs:range italy:Area .
+
+:total_cases rdf:type owl:DatatypeProperty ;
+             rdfs:domain :DpcObservation ;
+             rdfs:range xsd:integer .

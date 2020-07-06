@@ -56,12 +56,14 @@ def get_google_csv():
 
 # produced URIs will start with
 BASE_URI = "http://localhost:8000/"
-OUTPUT_NAME = "mobility"
+OUTPUT_NAME = "mobility_data"
 OUTPUT_FORMAT = "ttl"
 
 # download csv data from the italian dpc
-google_mobility_trends = pandas.read_csv(get_google_csv())
-apple_mobility_trends = pandas.read_csv(get_apple_csv())
+# google_mobility_trends = pandas.read_csv(get_google_csv())
+# apple_mobility_trends = pandas.read_csv(get_apple_csv())
+google_mobility_trends = pandas.read_csv('google.csv')
+apple_mobility_trends = pandas.read_csv('apple.csv')
 
 g_it_regions = ['Friuli Venezia Giulia', 'Lombardia', 'Sicilia', 'Sardegna', 'Piemonte',
                 'Valle d\'Aosta', 'Puglia', 'Toscana', 'Trentino Alto Adige']
@@ -77,13 +79,11 @@ apple_mobility_trends = apple_mobility_trends[apple_mobility_trends['country'] =
 
 # create an empty rdf graph and set the proper ontologies
 g = Graph()
-italy = Namespace(BASE_URI + "italy.rdf#")
-observation = Namespace(BASE_URI + "observation.rdf#")
-google_mobility = Namespace(BASE_URI + "google_mobility.rdf#")
-apple_mobility = Namespace(BASE_URI + "apple_mobility.rdf#")
-g.bind("gm", google_mobility)
-g.bind("am", apple_mobility)
-g.bind("obs", observation)
+italy = Namespace(BASE_URI + "italy.ttl#")
+obs = Namespace(BASE_URI + "observation.ttl#")
+mob = Namespace(BASE_URI + "mobility.ttl#")
+g.bind("mob", mob)
+g.bind("obs", obs)
 g.bind("italy", italy)
 
 for _, google_row in progressbar.progressbar(google_mobility_trends.iterrows(), max_value=len(google_mobility_trends.index)):
@@ -113,25 +113,26 @@ for _, google_row in progressbar.progressbar(google_mobility_trends.iterrows(), 
                              urify(google_row.date))
 
     g.add([uri_region, RDF.type, italy.Region])
-    g.add([uri_observation, RDF.type, observation.Observation])
+    g.add([uri_observation, RDF.type, obs.Observation])
 
     # set data for the given observation
     blank = BNode()
-    g.add([uri_observation, observation.date, Literal(google_row.date)])
-    g.add([uri_observation, observation.of, blank])
-    g.add([blank, observation.place, uri_region])
+    g.add([uri_observation, obs.date, Literal(google_row.date)])
+    g.add([uri_observation, obs.of, blank])
+    g.add([blank, RDF.type, mob.MobilityObservation])
+    g.add([blank, mob.place, uri_region])
 
-    g.add([blank, google_mobility.retail_recreation, Literal(
+    g.add([blank, mob.retail_recreation, Literal(
         google_row.retail_and_recreation_percent_change_from_baseline)])
-    g.add([blank, google_mobility.grocery_pharmacy, Literal(
+    g.add([blank, mob.grocery_pharmacy, Literal(
         google_row.grocery_and_pharmacy_percent_change_from_baseline)])
-    g.add([blank, google_mobility.parks, Literal(
+    g.add([blank, mob.parks, Literal(
         google_row.parks_percent_change_from_baseline)])
-    g.add([blank, google_mobility.transit_stations, Literal(
+    g.add([blank, mob.transit_stations, Literal(
         google_row.transit_stations_percent_change_from_baseline)])
-    g.add([blank, google_mobility.workplaces, Literal(
+    g.add([blank, mob.workplaces, Literal(
         google_row.workplaces_percent_change_from_baseline)])
-    g.add([blank, google_mobility.residential, Literal(
+    g.add([blank, mob.residential, Literal(
         google_row.residential_percent_change_from_baseline)])
 
     apple_walking = apple_rows.loc[apple_rows['transportation_type'] == 'walking']
@@ -139,13 +140,13 @@ for _, google_row in progressbar.progressbar(google_mobility_trends.iterrows(), 
     apple_transit = apple_rows.loc[apple_rows['transportation_type'] == 'transit']
 
     if apple_walking.empty == False:
-        g.add([blank, apple_mobility.walking, Literal(
+        g.add([blank, mob.walking, Literal(
             apple_walking[google_row.date].values[0])])
     if apple_driving.empty == False:
-        g.add([blank, apple_mobility.driving, Literal(
+        g.add([blank, mob.driving, Literal(
             apple_driving[google_row.date].values[0])])
     if apple_transit.empty == False:
-        g.add([blank, apple_mobility.transit, Literal(
+        g.add([blank, mob.transit, Literal(
             apple_transit[google_row.date].values[0])])
 
 g.serialize(destination='./' + OUTPUT_NAME + '.' +

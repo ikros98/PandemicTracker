@@ -1,0 +1,111 @@
+@prefix : <http://localhost:8000/pollution#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix airbase: <http://reference.eionet.europa.eu/airbase/schema/> .
+@prefix sk: <http://www.w3.org/2004/02/skos/core#> .
+@prefix obs: <http://localhost:8000/observation#> .
+@base <http://localhost:8000/pollution> .
+
+<http://localhost:8000/pollution> rdf:type owl:Ontology .
+
+:PollutionObservation rdf:type owl:Class ;
+                      rdfs:subClassOf obs:TypeOfObservation .
+:Station rdf:type owl:Class .
+:Pollutant rdf:type owl:Class .
+
+# blank nodes
+:StationPollutant rdf:type owl:Class .
+:PollutantObservation rdf:type owl:Class .
+:PollutantMeasurement rdf:type owl:Class .
+
+
+# sameAs airbase:Station
+:station rdf:type owl:ObjectProperty ;
+         rdfs:domain :PollutionObservation ;
+         rdfs:range :Station .
+
+:observing rdf:type owl:ObjectProperty ;
+           rdfs:domain :PollutionObservation ;
+           rdfs:range :PollutantObservation .
+
+# sameAs airbase:Components
+:pollutant rdf:type owl:ObjectProperty ;
+           rdfs:domain :PollutantObservation ,
+                       :StationPollutant ;
+           rdfs:range :Pollutant .
+
+:measures rdf:type owl:ObjectProperty ;
+          rdfs:domain :Station ;
+          rdfs:range :StationPollutant .
+
+# Station
+
+:namespace rdf:type owl:DatatypeProperty ;
+           rdfs:domain :Station ;
+           rdfs:range xsd:string .
+
+:air_quality_network rdf:type owl:DatatypeProperty ;
+                     rdfs:domain :Station ;
+                     rdfs:range xsd:string .
+
+:air_quality_station rdf:type owl:DatatypeProperty ;
+                     rdfs:domain :Station ;
+                     rdfs:range xsd:string .
+
+:air_quality_station_eoi_code rdf:type owl:DatatypeProperty ;
+                              rdfs:domain :Station ;
+                              rdfs:range xsd:string .
+
+
+# Pollutant
+
+:air_pollutant rdf:type owl:DatatypeProperty ;
+               rdfs:domain :Pollutant ;
+               rdfs:range xsd:string .
+
+:air_pollutant_code rdf:type owl:ObjectProperty ;
+                    rdfs:domain :Pollutant ;
+                    rdfs:range sk:Concept .
+
+:unit_of_measurement rdf:type owl:DatatypeProperty ;
+                     rdfs:domain :Pollutant ;
+                     rdfs:range xsd:string .
+
+
+# Station-Pollutant
+
+:sampling_point rdf:type owl:DatatypeProperty ;
+                rdfs:domain :StationPollutant ;
+                rdfs:range xsd:string .
+
+:sampling_process rdf:type owl:DatatypeProperty ;
+                  rdfs:domain :StationPollutant ;
+                  rdfs:range xsd:string .
+
+:sample rdf:type owl:DatatypeProperty ;
+        rdfs:domain :StationPollutant ;
+        rdfs:range xsd:string .
+
+
+# Pollutant-Observation
+
+:pollutant_measurement rdf:type owl:ObjectProperty ;
+                       rdfs:domain :PollutantObservation ;
+                       rdfs:range :PollutantMeasurement .
+
+
+# Pollutant-Measurement
+
+:datetime_begin rdf:type owl:DatatypeProperty ;
+                rdfs:domain :PollutantMeasurement ;
+                rdfs:range :xsd:dateTime .
+
+:datetime_end rdf:type owl:DatatypeProperty ;
+              rdfs:domain :PollutantMeasurement ;
+              rdfs:range :xsd:dateTime .
+
+:concentration rdf:type owl:DatatypeProperty ;
+               rdfs:domain :PollutantMeasurement ;
+               rdfs:range :xsd:float .

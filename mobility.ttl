@@ -1,0 +1,59 @@
+@prefix : <http://localhost:8000/mobility#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix italy: <http://localhost:8000/italy#> .
+@prefix obs: <http://localhost:8000/observation#> .
+@base <http://localhost:8000/mobility> .
+
+<http://localhost:8000/mobility> rdf:type owl:Ontology .
+
+:MobilityObservation rdf:type owl:Class ;
+                     rdfs:subClassOf obs:TypeOfObservation .
+
+:place rdf:type owl:ObjectProperty ;
+       rdfs:domain :MobilityObservation ;
+       rdfs:range italy:Area .
+
+
+# Google
+
+:retail_recreation rdf:type owl:DatatypeProperty ;
+                   rdfs:domain :MobilityObservation ;
+                   rdfs:range xsd:float .
+
+:grocery_pharmacy rdf:type owl:DatatypeProperty ;
+                  rdfs:domain :MobilityObservation ;
+                  rdfs:range xsd:float .
+
+:parks rdf:type owl:DatatypeProperty ;
+       rdfs:domain :MobilityObservation ;
+       rdfs:range xsd:float .
+
+:transit_stations rdf:type owl:DatatypeProperty ;
+                  rdfs:domain :MobilityObservation ;
+                  rdfs:range xsd:float .
+
+:workplaces rdf:type owl:DatatypeProperty ;
+            rdfs:domain :MobilityObservation ;
+            rdfs:range xsd:float .
+
+:residential rdf:type owl:DatatypeProperty ;
+             rdfs:domain :MobilityObservation ;
+             rdfs:range xsd:float .
+
+
+# Apple
+
+:walking rdf:type owl:DatatypeProperty ;
+         rdfs:domain :MobilityObservation ;
+         rdfs:range xsd:float .
+
+:driving rdf:type owl:DatatypeProperty ;
+         rdfs:domain :MobilityObservation ;
+         rdfs:range xsd:float .
+
+:transit rdf:type owl:DatatypeProperty ;
+         rdfs:domain :MobilityObservation ;
+         rdfs:range xsd:float .
