@@ -2,7 +2,7 @@
 
 ## Introduzione
 
-Il progetto ha come obbiettivo quello di creare un dataset che contenga informazioni relative al Covid in relazione alla mobilità e all'inquinamento. Il lavoro si concentra nell'unire questi dataset cosi da poter successivamente dare all'utente la possibilità, attraverso un bot telegram, di ricevere tutte le informazioni relative ad una particolare località. Queste informazioni verranno quindi elaborate e mostrate all'utente attraverso dei grafici così da renderne facile la lettura. I dati uniti sono accessibili attraverso un endpoind SPARQL in esecuzione sullo stesso server del bot.
+Il progetto ha come obbiettivo quello di creare un dataset che contenga informazioni relative al Covid in relazione alla mobilità e all'inquinamento. Il lavoro si concentra nell'unire questi dataset cosi da poter successivamente dare all'utente la possibilità, attraverso un bot telegram, di ricevere tutte le informazioni relative ad una particolare località. Queste informazioni verranno quindi elaborate e mostrate all'utente attraverso dei grafici così da renderne facile la lettura. I dati uniti sono accessibili attraverso un endpoind SPARQL in esecuzione sullo stesso server del bot. Tutti i servizi saranno eseguiti su un dispositivo chiamato *OrangePi*, ovvero una scheda *Open-Source* basata su architettura *ARM*, sulla quale possono essere eseguite distribuzioni linux e quella che abbiamo utilizzzato noi è  *Armbian*, una distribuzione di linux creata per dispositivi che funzionano con architetture *ARM*.
 
 ## Dataset utilizzati 
 
@@ -207,6 +207,71 @@ A questo punto è possibile interrogare il server virtuoso all'indirizzo `http:/
 ## Creazione del bot telegram
 
 ![](imgs/esempio_bot.png)
+
+Come lato client del nostro progetto abbiamo deciso di realizzare un bot telegram tramite la libreria `python-telegram-bot` , cioè un wrapper delle API telegram. Per realizzarlo abbiamo pensato di utilizzare una struttura a conversazione (*Conversation Handler*), gestita da un automa  con uno stato iniziale, uno di uscita e 3 stati per la gesione della conversazione: `CHOICE`, `LOCATION` e `CHOOSING`
+
+```python
+conv_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
+
+        states={
+
+            CHOICE: [MessageHandler(Filters.regex('^(Stats by location|Global stats)$'), choice)],
+
+            LOCATION: [MessageHandler(Filters.location, location)],
+
+            CHOOSING: [MessageHandler(Filters.regex('^More stats$'), choosing)]
+        },
+
+        fallbacks=[MessageHandler(Filters.regex('^Done$'), done)]
+    )
+```
+
+Lo stato iniziale è definito *Comand Handler*. Per ogni stato interno, compreso lo stato di uscita, abbiamo definito un *Message Handler* con un filtro sui dati. Ogni  *Handler* è costituito da una parte di codice che permette al bot di comunicare e gestire le richieste dell'utente.
+
+Il comportamento del bot si sviluppa in questo modo:
+
++ Avviamento dopo il comando `/start` dell'utente. Saluto del bot con successiva scelta dell'azione dell'utente tra: "Stats by location" e "Done", dove la prima permette appunto di richiedere i dati tramite la posizione, mentre la seconda fa terminare il bot. Tutto questo viene gestitito dallo stato iniziale.
+
++ Dopo aver preso la nostra scelta ci ritroveremo nello stato `CHOICE` che la gestirà. Se la scelta fosse "Stats by location" allora il bot chiederebbe all'utente di condividere una posizione per cui l'utente vuole ottenere dei risultati.
+
++  Lo stato `LOCATION` gestirà la posizione dell'utente. Quindi vengono eseguite le query sui nostri dati per la creazione di un di un grafico contenente i nostri dati di output, sotto forma di immagine che verrà successivamente inviata all'utente.
+
+  ```python
+  # funzione dello stato LOCATION
+  def location(update, context):
+    	# logging
+      user = update.message.from_user
+      user_location = update.message.location
+      logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
+                  user_location.longitude)
+      
+      reply_keyboard = [['More stats','Done']]
+      
+      # interazione con l'utente con la stampa della tastiera
+      update.message.reply_text(
+          'Here there are the data:\n... ... ...',
+          reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True, one_time_keyboard=True))
+  
+      bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING)
+      
+      # elaborazione dei dati
+      province = get_province_for(user_location.latitude, user_location.longitude)
+      station = get_station_for(user_location.latitude, user_location.longitude)
+      observations = get_observations_for(province[0], station[0])
+  		
+      # creazione dell'immagine e invio all'utente
+      image = plot_for(province, station, observations)
+  
+      bot.send_photo(chat_id=update.message.chat_id, photo=image)
+      
+      # passa allo stato CHOOSING
+      return CHOOSING
+  ```
+
++ Si passa successivamente nello stato `CHOOSING` che permette di decidere se continuare a richiedere informazioni al bot oppure di terminarlo tramite le azioni "More stats" e "Done". Se si dovesse scegliere "More stats" Ritorneremo allo stato `CHOICE`.
+
+  
 
 ### Query in base alla posizione dell'utente
 
