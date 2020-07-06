@@ -41,7 +41,19 @@ def plot_for(province, station, observations):
         np.clip(np.diff(values[:, 1], prepend=0),
                 a_min=0, a_max=None), 3)
     air_quality_data = gaussian_filter1d(values[:, 0], 3)
-    mobility_data = gaussian_filter1d(values[:, 8], 3)
+
+    values = values[:, 2:]
+    # replace apple nan values (11-12 may) with the preceding values
+    apple = values[:, 0]
+    mask = np.isnan(apple)
+    idx = np.where(~mask, np.arange(mask.shape[0]), 0)
+    np.maximum.accumulate(idx, axis=0, out=idx)
+    apple[mask] = apple[idx[mask]]
+
+    values[:, 0] = apple - 100
+    values[:, 6] = -values[:, 6]
+    values = np.average(values, axis=1)
+    mobility_data = gaussian_filter1d(values, 2)
 
     plt.style.use("seaborn-dark")
     for param in ['figure.facecolor', 'axes.facecolor', 'savefig.facecolor']:
@@ -67,9 +79,9 @@ def plot_for(province, station, observations):
                       color='#08F7FE',
                       alpha=0.1)
 
-    host.set_xlabel("Dati sulla qualità dell'aria registrati dalla stazione {} a circa {:.0f}km da te.\n".format(station_name, station_dist) +
-                    "Dati sulla mobilità forniti da Apple e Google per la Regione {}.".format(
-                        region_name),
+    host.set_xlabel("Dati sulla mobilità forniti da Apple e Google per la Regione {}.\n".format(region_name) +
+                    "Dati sulla qualità dell'aria registrati dalla stazione {} a circa {:.0f}km da te. I dati sono stati traslati di due settimane.".format(
+                        station_name, max(1, station_dist)),
                     fontsize=7,
                     position=(1, 0),
                     horizontalalignment='right')

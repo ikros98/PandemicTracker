@@ -27,7 +27,6 @@ def get_province_for(latitude, longitude):
 
 
 def get_station_for(latitude, longitude):
-
     q = """
     PREFIX italy: <http://localhost:8000/italy.ttl#>
     PREFIX airbase: <http://reference.eionet.europa.eu/airbase/schema/>
@@ -52,9 +51,8 @@ def get_station_for(latitude, longitude):
         }
 
         ?internal_stat owl:sameAs ?stat ;
-                       pol:measures ?blank .
-        ?blank pol:pollutant ?pollutant .
-        ?pollutant pol:air_pollutant "PM10" . 
+                       ?p ?blank .
+        ?blank pol:pollutant <http://localhost:8000/pollutant/PM10> .
     }
     order by asc(?dist)
     limit 1
