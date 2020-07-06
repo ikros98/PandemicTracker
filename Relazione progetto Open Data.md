@@ -231,27 +231,20 @@ Lo stato iniziale è definito *Comand Handler*. Per ogni stato interno, compreso
 
 Il comportamento del bot si sviluppa in questo modo:
 
-+ Avviamento dopo il comando `/start` dell'utente. Saluto del bot con successiva scelta dell'azione dell'utente tra: "Stats by location" e "Done", dove la prima permette appunto di richiedere i dati tramite la posizione, mentre la seconda fa terminare il bot. Tutto questo viene gestitito dallo stato iniziale.
++ Avviamento dopo il comando `/start` dell'utente. Saluto del bot con successiva scelta dell'azione dell'utente tra: "Dati dalla posizione" e "Esci", dove la prima permette appunto di richiedere i dati tramite la posizione, mentre la seconda fa terminare il bot. Tutto questo viene gestitito dallo stato iniziale.
 
-+ Dopo aver preso la nostra scelta ci ritroveremo nello stato `CHOICE` che la gestirà. Se la scelta fosse "Stats by location" allora il bot chiederebbe all'utente di condividere una posizione per cui l'utente vuole ottenere dei risultati.
++ Dopo aver preso la nostra scelta ci ritroveremo nello stato `CHOICE` che la gestirà. Se la scelta fosse "Dati dalla posizione" allora il bot chiederebbe all'utente di condividere una posizione per cui l'utente vuole ottenere dei risultati.
 
 +  Lo stato `LOCATION` gestirà la posizione dell'utente. Quindi vengono eseguite le query sui nostri dati per la creazione di un di un grafico contenente i nostri dati di output, sotto forma di immagine che verrà successivamente inviata all'utente.
 
   ```python
-  # funzione dello stato LOCATION
-  def location(update, context):
-    	# logging
+    # funzione dello stato LOCATION
+    def location(update, context):
+      # logging
       user = update.message.from_user
       user_location = update.message.location
       logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
                   user_location.longitude)
-      
-      reply_keyboard = [['More stats','Done']]
-      
-      # interazione con l'utente con la stampa della tastiera
-      update.message.reply_text(
-          'Here there are the data:\n... ... ...',
-          reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True, one_time_keyboard=True))
   
       bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING)
       
@@ -259,17 +252,22 @@ Il comportamento del bot si sviluppa in questo modo:
       province = get_province_for(user_location.latitude, user_location.longitude)
       station = get_station_for(user_location.latitude, user_location.longitude)
       observations = get_observations_for(province[0], station[0])
-  		
+  
       # creazione dell'immagine e invio all'utente
       image = plot_for(province, station, observations)
-  
       bot.send_photo(chat_id=update.message.chat_id, photo=image)
+  
+      # interazione con l'utente con la stampa della tastiera
+      reply_keyboard = [['Altri Dati','Esci']]
+      update.message.reply_text(
+          'Spero che tu stia bene',
+          reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True, one_time_keyboard=True))
       
       # passa allo stato CHOOSING
       return CHOOSING
   ```
-
-+ Si passa successivamente nello stato `CHOOSING` che permette di decidere se continuare a richiedere informazioni al bot oppure di terminarlo tramite le azioni "More stats" e "Done". Se si dovesse scegliere "More stats" Ritorneremo allo stato `CHOICE`.
+  
++ Si passa successivamente nello stato `CHOOSING` che permette di decidere se continuare a richiedere informazioni al bot oppure di terminarlo tramite le azioni "Altri dati" e "Esci". Se si dovesse scegliere "Altri dati" Ritorneremo allo stato `CHOICE`.
 
   
 

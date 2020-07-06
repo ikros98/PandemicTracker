@@ -23,44 +23,30 @@ updater = Updater(token, use_context=True)
 bot = Bot(token = token)
 
 def start(update, context):
-    reply_keyboard = [['Stats by location','Global stats'],
-                        ['Done']]
+    reply_keyboard = [['Dati dalla posizione','Esci']]
 
     update.message.reply_text(
-        'Hi! My name is PandemicTrackerBot, ask me anything!',
+        'Ciao! il mio nome è PandemicTrackerBot, come posso aiutarti?',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True, one_time_keyboard=True))
 
     return CHOICE
 
-
 def choice(update, context):
     user = update.message.from_user
     logger.info("Choice of %s: %s", user.first_name, update.message.text)
-    reply_keyboard = [['More stats','Done']]
+    reply_keyboard = [['Altri Dati','Esci']]
 
-    if update.message.text == 'Stats by location':
-        update.message.reply_text('Send me a location', reply_markup=ReplyKeyboardRemove())
+    if update.message.text == 'Dati dalla posizione':
+        update.message.reply_text('Condividimi una posizione', reply_markup=ReplyKeyboardRemove())
         return LOCATION
 
-    elif  update.message.text == 'Global stats':
-        update.message.reply_text(
-        'Here there are the data:\n... ... ...',
-        reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True, one_time_keyboard=True))
-
         return CHOOSING
-
 
 def location(update, context):
     user = update.message.from_user
     user_location = update.message.location
     logger.info("Location of %s: %f / %f", user.first_name, user_location.latitude,
                 user_location.longitude)
-    
-    reply_keyboard = [['More stats','Done']]
-    
-    update.message.reply_text(
-        'Here there are the data:\n... ... ...',
-        reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True, one_time_keyboard=True))
 
     bot.sendChatAction(chat_id=update.message.chat_id, action=ChatAction.TYPING)
     
@@ -69,32 +55,34 @@ def location(update, context):
     observations = get_observations_for(province[0], station[0])
 
     image = plot_for(province, station, observations)
-
     bot.send_photo(chat_id=update.message.chat_id, photo=image)
 
+    reply_keyboard = [['Altri Dati','Esci']]
+    update.message.reply_text(
+        'Spero che tu stia bene',
+        reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True, one_time_keyboard=True))
 
     return CHOOSING
 
 def choosing(update, context): 
     user = update.message.from_user
     logger.info("Chosing")
-    reply_keyboard = [['Stats by location','Global stats'],
-                        ['Done']]
+    reply_keyboard = [['Dati dalla posizione','Esci']]
 
-    if update.message.text == 'More stats':
+    if update.message.text == 'Altri Dati':
         update.message.reply_text(
-                "I hope u are doing well",
+                "Chiedimi pure!",
                 reply_markup=ReplyKeyboardMarkup(reply_keyboard, resize_keyboard=True, one_time_keyboard=True))
         return CHOICE
 
-    elif update.message.text == 'Done':
+    elif update.message.text == 'Esci':
         return ConversationHandler.END
 
     
 def done(update, context):
-    #user = update.message.from_user
+    # user = update.message.from_user
     logger.info("End")
-    update.message.reply_text('Bye!', reply_markup=ReplyKeyboardRemove())
+    update.message.reply_text('Alla prossima!', reply_markup=ReplyKeyboardRemove())
 
     return ConversationHandler.END
 
@@ -125,26 +113,26 @@ def main():
 
     dp = updater.dispatcher
 
-    #conversation handler
+    # conversation handler
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
 
         states={
 
-            CHOICE: [MessageHandler(Filters.regex('^(Stats by location|Global stats)$'), choice)],
+            CHOICE: [MessageHandler(Filters.regex('^(Dati dalla posizione)$'), choice)],
 
             LOCATION: [MessageHandler(Filters.location, location)],
 
-            CHOOSING: [MessageHandler(Filters.regex('^More stats$'), choosing)]
+            CHOOSING: [MessageHandler(Filters.regex('^Altri Dati$'), choosing)]
         },
 
-        fallbacks=[MessageHandler(Filters.regex('^Done$'), done)]
+        fallbacks=[MessageHandler(Filters.regex('^Esci$'), done)]
     )
 
     dp.add_handler(conv_handler)
     dp.add_error_handler(error_handler)
 
-    #Start the Bot
+    # Start the Bot
     updater.start_polling()
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
