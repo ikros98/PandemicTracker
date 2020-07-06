@@ -1,11 +1,12 @@
-import sparql
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy.ndimage import gaussian_filter1d
-import urllib.parse
-import io
 from query import *
-
+import io
+import urllib.parse
+from scipy.ndimage import gaussian_filter1d
+import numpy as np
+import sparql
+import matplotlib as mpl
+mpl.use('tkagg')
+import matplotlib.pyplot as plt
 
 def prepare_dates(row):
     months = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu",
