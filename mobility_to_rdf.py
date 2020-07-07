@@ -59,7 +59,7 @@ BASE_URI = "http://localhost:8000/"
 OUTPUT_NAME = "mobility_data"
 OUTPUT_FORMAT = "ttl"
 
-# download csv data from the italian dpc
+# download csv data from apple and google
 # google_mobility_trends = pandas.read_csv(get_google_csv())
 # apple_mobility_trends = pandas.read_csv(get_apple_csv())
 google_mobility_trends = pandas.read_csv('google.csv')
