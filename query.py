@@ -12,7 +12,7 @@ def get_province_for(latitude, longitude):
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
 
-    select ?closest_prov ?closest_region bif:st_distance(bif:st_point(""" + str(latitude) + ", " + str(longitude) + """), bif:st_point(?latitude, ?longitude)) as ?dist
+    select ?closest_prov ?closest_region bif:sqrt((""" + str(latitude) + """ - ?latitude) * (""" + str(latitude) + """ - ?latitude) + (""" + str(longitude) + """ - ?longitude) * (""" + str(longitude) + """ - ?longitude)) as ?dist
     where {
         ?closest_prov rdf:type italy:Province ;
                       geo:lat ?latitude ;
@@ -39,7 +39,7 @@ def get_station_for(latitude, longitude):
     select ?internal_stat ?dist
     where {
         service <https://semantic.eea.europa.eu/sparql> {
-            select ?stat bif:st_distance(bif:st_point(""" + str(latitude) + ", " + str(longitude) + """), bif:st_point(?s_lat, ?s_long)) as ?dist
+            select ?stat bif:sqrt((""" + str(latitude) + """ - ?latitude) * (""" + str(latitude) + """ - ?latitude) + (""" + str(longitude) + """ - ?longitude) * (""" + str(longitude) + """ - ?longitude)) as ?dist
             where {
                 ?stat rdf:type airbase:Station ;
                       geo:lat ?s_lat ;
