@@ -4,3 +4,4 @@
 *.nt
 *_data.ttl
 *.zip
+__pycache__/

@@ -8,6 +8,8 @@ Il progetto ha come obbiettivo quello di creare un dataset che contenga informaz
 
 
 
+
+
 <!-- vscode-markdown-toc -->
 
 * 1. [Dataset utilizzati](#Datasetutilizzati)
@@ -50,7 +52,7 @@ I dataset sulla mobilita [Apple mobility trends](https://www.apple.com/covid19/m
 
 ####  1.3. <a name='DatasetInquinamento'></a>Dataset Inquinamento 
 
-Il dataset sull’inquinamento, messo a disposizione dall'European Environment Agency e consultabile tramite la mappa [European Air Quality Index](https://airindex.eea.europa.eu/#), è il risultato dell'unione di numerosi servizi di monitorazione locale, come quello fornito da [ARPA Sicilia](https://www.arpa.sicilia.it/temi-ambientali/aria/bollettino-aria/). L'utilizzo di questo dataset serve per mettere in relazione il numero di contagi con l'inquinamento atmosferico e per vedere come le politiche di lockdown e le relative misure attuate per contrastare la diffusione del covid abbiano influito sulle concentrazioni di inquinamento atmosferico.
+Il dataset sull’inquinamento, messo a disposizione dall'European Environment Agency e consultabile tramite la mappa [European Air Quality Index](https://airindex.eea.europa.eu/#), è il risultato dell'unione di numerosi servizi di monitoraggio locale, come quello fornito da [ARPA Sicilia](https://www.arpa.sicilia.it/temi-ambientali/aria/bollettino-aria/). L'utilizzo di questo dataset serve per mettere in relazione il numero di contagi con l'inquinamento atmosferico e per vedere come le politiche di lockdown e le relative misure attuate per contrastare la diffusione del covid abbiano influito sulle concentrazioni di inquinamento atmosferico.
 European Environment Agency mette a disposizione un endpoint SPARQL tramite cui è possibile accedere alle informazioni sulle stazioni, mentre le misurazioni effettive sono reperibili in formato `csv` tramite l'api [Air Quality Export](https://discomap.eea.europa.eu/map/fme/AirQualityExport.htm). Il tutto è fornito sotto licenza `ODC-BY`.
 
 ##  2. <a name='Pipelinedielaborazione'></a>Pipeline di elaborazione
@@ -123,7 +125,7 @@ Nei nostri script abbiamo fatto solo uso dei dati per provincia, tra quelli forn
 
 <img src="imgs/italy.png" style="zoom:120%;" />
 
-Nel file `pollution.ttl` sono presenti varie classi, molte delle quali sono state impiegate come blank nodes. Due classi che presentano URI sono invece `Station` e `Pollutant`, che avranno rispettivamente `http://localhost:8000/station/air-quality-station-eoi-code` e `http://localhost:8000/station/air-pollutant-code`. Esse sono rappresentate nel grafo seguente. Queste classi contengono dei dati non direttamente reperibili dall'endpoint SPARQL dell'EEA ma presenti nei file `csv` scaricati. Pertanto, ogni individuo di queste classi deve essere riconducibile al suo corrispondente dell'EEA, e per fare ciò abbiamo usato la proprietà `owl:sameAs`.
+Nel file `pollution.ttl` sono presenti varie classi, molte delle quali sono state impiegate come blank nodes. Due classi che presentano URI sono invece `Station` e `Pollutant`, che avranno rispettivamente `http://localhost:8000/station/air-quality-station-eoi-code` e `http://localhost:8000/pollutant/air-pollutant-code`. Esse sono rappresentate nel grafo seguente. Queste classi contengono dei dati non direttamente reperibili dall'endpoint SPARQL dell'EEA ma presenti nei file `csv` scaricati. Pertanto, ogni individuo di queste classi deve essere riconducibile al suo corrispondente dell'EEA, e per fare ciò abbiamo usato la proprietà `owl:sameAs`.
 Un'altra informazione non esplicitamente disponibile dall'endpoint dell'EEA è la relazione tra `Station` e `Pollutant`. Abbiamo creato una classe `StationPollutant` per mapparla, ma essa è sempre associata a dei blank nodes. 
 
 <img src="imgs/station_pollutant.png" style="zoom: 150%;" />
@@ -244,7 +246,7 @@ DB.DBA.TTLP_MT (file_to_string_output ('pollution_data.ttl'), '', 'http://localh
 A questo punto è possibile interrogare il server virtuoso all'indirizzo `http://localhost:8890/sparql`. Inoltre, per rendere accessibili le ontologie basta creare un server nella cartella che le contiene con 
 
 ```bash
-python3 -m http.server
+$ python3 -m http.server
 ```
 
 così da avere URI come
@@ -344,7 +346,7 @@ limit 1
 
 ###  4.2. <a name='Queryperlastazionepivicina'></a>Query per la stazione più vicina
 
-La query per ottenere la stazione più vicina è simile a quella appena vista ma, dal momento che il nostro database non contiene informazioni sulle stazioni, è necessario effettuæ una query federata per avere l'elenco delle stazioni con la loro posizione. Inoltre, dopo averle ottenute, dobbiamo anche filtrarle per tenere solo quelle che misurano i livelli di PM10. Per realizzare questo filtro possiamo usare i dati che abbiamo raccolto dalle osservazioni e associati alle classi locali `Station` e `Province`. Usiamo `owl:sameAs` per passare dalla classe della stazione restituita dall'EEA alla nostra e successivamente ci assicuriamo che tale stazione monitori PM10 con la relazione `pol:pollutant`.
+La query per ottenere la stazione più vicina è simile a quella appena vista ma, dal momento che il nostro database non contiene informazioni sulle stazioni, è necessario effettuær[&#8239;](https://www.youtube.com/watch?v=obIsgYf3yhw) una query federata per avere l'elenco delle stazioni con la loro posizione. Inoltre, dopo averle ottenute, dobbiamo anche filtrarle per tenere solo quelle che misurano i livelli di PM10. Per realizzare questo filtro possiamo usare i dati che abbiamo raccolto dalle osservazioni e associati alle classi locali `Station` e `Province`. Usiamo `owl:sameAs` per passare dalla classe della stazione restituita dall'EEA alla nostra e successivamente ci assicuriamo che tale stazione monitori PM10 con la relazione `pol:pollutant`.
 
 ```sparql
 select distinct(?internal_stat) ?dist
@@ -364,7 +366,7 @@ where {
     }
 
     ?internal_stat owl:sameAs ?stat ;
-                    ?p ?blank .
+                   ?p ?blank .
     ?blank pol:pollutant <http://localhost:8000/pollutant/PM10> .
 }
 order by asc(?dist)
@@ -395,18 +397,18 @@ where {
     filter (?prov = PROVINCE) .
 
     ?r rdf:type mob:MobilityObservation ;
-        mob:place ?reg .
+       mob:place ?reg .
     ?reg rdf:type italy:Region ;
-          italy:name ?region ;
-          italy:has_province ?prov .
+         italy:name ?region ;
+         italy:has_province ?prov .
     optional { 
         ?r mob:driving ?driving ;
-            mob:retail_recreation ?retail_recreation ;
-            mob:grocery_pharmacy ?grocery_pharmacy ;
-            mob:parks ?parks;
-            mob:transit_stations ?transit_stations;
-            mob:workplaces ?workplaces ;
-            mob:residential ?residential .
+           mob:retail_recreation ?retail_recreation ;
+           mob:grocery_pharmacy ?grocery_pharmacy ;
+           mob:parks ?parks;
+           mob:transit_stations ?transit_stations;
+           mob:workplaces ?workplaces ;
+           mob:residential ?residential .
     } 
 ```
 
@@ -439,7 +441,7 @@ La seconda parte recupera i dati sulla qualità dell'aria. Dal momento che ci so
 
 ###  4.4. <a name='Creazionedelgraficodalleosservazioni'></a>Creazione del grafico dalle osservazioni
 
-Una volta ottenute le osservazioni su contagiti, mobilità e inquinamento, abbiamo optato per rappresentare questi dati in un unico grafico qualitativo, come i seguenti.
+Una volta ottenute le osservazioni su contagiti, mobilità e inquinamento, abbiamo optato per rappresentare questi dati in un unico grafico qualitativo, come il seguente.
 
 ![](imgs/esempio_grafico.jpeg)
 
@@ -492,12 +494,6 @@ values = np.average(values, axis=1)
 mobility_data = gaussian_filter1d(values, 2)
 ```
 
-|      |      |
-| ---- | ---- |
-| <img src="imgs/posizione.png" style="zoom: 150%;"> | <img src="imgs/risultato.png" style="zoom: 150%;"> |
-| Scelta della posizione da inviare al bot | Risposta con i risultati dell'analisi |
-
-
 Infine, usando `matplotlib` possiamo rappresentare insieme i dati di `air_quality_data`, `infections_data` e `mobility_data` restituendo un'immagine tramite `fig.savefig`, che sarà poi inviata dal bot all'utente che ne ha fatto richiesta.
 
 ```python
@@ -510,3 +506,10 @@ def plot_for(province, station, observations):
   buf.seek(0)
   return buf
 ```
+
+|      |      |
+| ---- | ---- |
+| <img src="imgs/posizione.png" style="zoom: 150%;"> | <img src="imgs/risultato.png" style="zoom: 150%;"> |
+| Scelta della posizione da inviare al bot | Risposta con i risultati dell'analisi |
+
+Il bot è raggiungibile su telegram tramite l'id [@PandemicTrackerBot](https://t.me/PandemicTrackerBot) e il suo codice sorgente, insieme agli script che servono per scaricare ed elaborare i dati, è disponibile nella repository [PandemicTracker](https://github.com/ikros98/PandemicTracker) su Github.
