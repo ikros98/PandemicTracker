@@ -36,10 +36,10 @@ def get_station_for(latitude, longitude):
     PREFIX sk: <http://www.w3.org/2004/02/skos/core#>
     PREFIX owl: <http://www.w3.org/2002/07/owl#>
 
-    select distinct(?internal_stat) ?dist
+    select ?internal_stat ?dist
     where {
         service <https://semantic.eea.europa.eu/sparql> {
-            select distinct(?stat) bif:st_distance(bif:st_point(""" + str(latitude) + ", " + str(longitude) + """), bif:st_point(?s_lat, ?s_long)) as ?dist
+            select ?stat bif:st_distance(bif:st_point(""" + str(latitude) + ", " + str(longitude) + """), bif:st_point(?s_lat, ?s_long)) as ?dist
             where {
                 ?stat rdf:type airbase:Station ;
                       geo:lat ?s_lat ;

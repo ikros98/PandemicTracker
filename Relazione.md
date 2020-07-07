@@ -349,10 +349,10 @@ limit 1
 La query per ottenere la stazione più vicina è simile a quella appena vista ma, dal momento che il nostro database non contiene informazioni sulle stazioni, è necessario effettuær[&#8239;](https://www.youtube.com/watch?v=obIsgYf3yhw) una query federata per avere l'elenco delle stazioni con la loro posizione. Inoltre, dopo averle ottenute, dobbiamo anche filtrarle per tenere solo quelle che misurano i livelli di PM10. Per realizzare questo filtro possiamo usare i dati che abbiamo raccolto dalle osservazioni e associati alle classi locali `Station` e `Province`. Usiamo `owl:sameAs` per passare dalla classe della stazione restituita dall'EEA alla nostra e successivamente ci assicuriamo che tale stazione monitori PM10 con la relazione `pol:pollutant`.
 
 ```sparql
-select distinct(?internal_stat) ?dist
+select ?internal_stat ?dist
 where {
     service <https://semantic.eea.europa.eu/sparql> {
-        select  distinct(?stat) 
+        select  ?stat
                 bif:st_distance(bif:st_point(USER_LAT, USER_LONG),
                 bif:st_point(?s_lat, ?s_long)) as ?dist
         where {
